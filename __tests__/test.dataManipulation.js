@@ -1,5 +1,6 @@
 const { createRef } = require("../createRef");
 const { formatAlbums } = require("../formatAlbums");
+const { formatUserData, createFilmLookup } = require("../formatUserData");
 
 describe("createRef", () => {
   test("returns an empty object when passed an empty array", () => {
@@ -150,5 +151,239 @@ describe("formatAlbums", () => {
       { name: "Lover", artist: "Taylor Swift", releaseYear: 2019 },
       { name: "High Voltage", artist: "AC/DC", releaseYear: 1975 },
     ]);
+  });
+});
+
+describe("formatUserData", () => {
+  test("returns an empty array when passed an empty array of users", () => {
+    // Arrange
+    const testUsers = [];
+    const testFilmRatings = [];
+
+    // Act
+    const outputUsers = formatUserData(testUsers, testFilmRatings);
+    // Assert
+    expect(outputUsers).toEqual([]);
+  });
+  test("returns a new array", () => {
+    // Arrange
+    const testUsers = [];
+    const testFilmRatings = [];
+
+    // Act
+    const outputUsers = formatUserData(testUsers, testFilmRatings);
+    // Assert
+    expect(outputUsers).not.toBe(testUsers);
+  });
+  test("returns new user objects inside the returned array", () => {
+    // Arrange
+    const testUsers = [
+      { username: "bartyBoo", favFilms: ["Barbie", "Braveheart", "Ben-Hur"] },
+    ];
+    const testFilmRatings = [];
+
+    // Act
+    const outputUsers = formatUserData(testUsers, testFilmRatings);
+    // Assert
+    expect(outputUsers[0]).not.toBe(testUsers[0]);
+  });
+  test("updates favFilms in users to an array of objects with name and score keys when passed one user object", () => {
+    // Arrange
+    const testUsers = [
+      { username: "bartyBoo", favFilms: ["Barbie", "Braveheart", "Ben-Hur"] },
+    ];
+    const testFilmRatings = [
+      { title: "Barbie", rating: 3 },
+      { title: "Barbie", rating: 1 },
+      { title: "Barbie", rating: 5 },
+      { title: "Babe", rating: 1 },
+      { title: "Bambi", rating: 2 },
+      { title: "Bambi", rating: 4 },
+      { title: "Ben-Hur", rating: 5 },
+      { title: "Ben-Hur", rating: 3 },
+      { title: "Ben-Hur", rating: 4 },
+      { title: "Braveheart", rating: 4 },
+      { title: "Braveheart", rating: 3 },
+      { title: "Barbie", rating: 4 },
+    ];
+
+    // Act
+    const outputUsers = formatUserData(testUsers, testFilmRatings);
+    // Assert
+    expect(typeof outputUsers[0].favFilms[0]).toBe("object");
+    expect(typeof outputUsers[0].favFilms[1]).toBe("object");
+    expect(typeof outputUsers[0].favFilms[2]).toBe("object");
+
+    expect(outputUsers[0].favFilms[0].hasOwnProperty("name")).toBe(true);
+    expect(outputUsers[0].favFilms[1].hasOwnProperty("name")).toBe(true);
+    expect(outputUsers[0].favFilms[2].hasOwnProperty("name")).toBe(true);
+
+    expect(outputUsers[0].favFilms[0].hasOwnProperty("score")).toBe(true);
+    expect(outputUsers[0].favFilms[1].hasOwnProperty("score")).toBe(true);
+    expect(outputUsers[0].favFilms[2].hasOwnProperty("score")).toBe(true);
+  });
+
+  test("scores for each film are the average of the score from the filmRatings array", () => {
+    // Arrange
+    const testUsers = [
+      { username: "bartyBoo", favFilms: ["Barbie", "Braveheart", "Ben-Hur"] },
+    ];
+    const testFilmRatings = [
+      { title: "Barbie", rating: 3 },
+      { title: "Barbie", rating: 1 },
+      { title: "Barbie", rating: 5 },
+      { title: "Babe", rating: 1 },
+      { title: "Bambi", rating: 2 },
+      { title: "Bambi", rating: 4 },
+      { title: "Ben-Hur", rating: 5 },
+      { title: "Ben-Hur", rating: 3 },
+      { title: "Ben-Hur", rating: 4 },
+      { title: "Braveheart", rating: 4 },
+      { title: "Braveheart", rating: 3 },
+      { title: "Barbie", rating: 4 },
+    ];
+
+    // Act
+    const outputUsers = formatUserData(testUsers, testFilmRatings);
+    // Assert
+
+    expect(outputUsers[0].favFilms[0].score).toBe(3.25);
+    expect(outputUsers[0].favFilms[1].score).toBe(3.5);
+    expect(outputUsers[0].favFilms[2].score).toBe(4);
+  });
+
+  test("handles multiple users in the array", () => {
+    // Arrange
+    const testUsers = [
+      { username: "bartyBoo", favFilms: ["Barbie", "Braveheart", "Ben-Hur"] },
+      { username: "rosieandjim", favFilms: ["Braveheart", "Bambi", "Babe"] },
+    ];
+    const testFilmRatings = [
+      { title: "Barbie", rating: 3 },
+      { title: "Barbie", rating: 1 },
+      { title: "Barbie", rating: 5 },
+      { title: "Babe", rating: 1 },
+      { title: "Bambi", rating: 2 },
+      { title: "Bambi", rating: 4 },
+      { title: "Ben-Hur", rating: 5 },
+      { title: "Ben-Hur", rating: 3 },
+      { title: "Ben-Hur", rating: 4 },
+      { title: "Braveheart", rating: 4 },
+      { title: "Braveheart", rating: 3 },
+      { title: "Barbie", rating: 4 },
+    ];
+
+    // Act
+    const outputUsers = formatUserData(testUsers, testFilmRatings);
+    // Assert
+
+    expect(outputUsers).toEqual([
+      {
+        username: "bartyBoo",
+        favFilms: [
+          { name: "Barbie", score: 3.25 },
+          { name: "Braveheart", score: 3.5 },
+          { name: "Ben-Hur", score: 4 },
+        ],
+      },
+      {
+        username: "rosieandjim",
+        favFilms: [
+          { name: "Braveheart", score: 3.5 },
+          { name: "Bambi", score: 3 },
+          { name: "Babe", score: 1 },
+        ],
+      },
+    ]);
+  });
+
+  test("does not mutate input users", () => {
+    // Arrange
+    const testUsers = [
+      { username: "bartyBoo", favFilms: ["Barbie", "Braveheart", "Ben-Hur"] },
+      { username: "rosieandjim", favFilms: ["Braveheart", "Bambi", "Babe"] },
+    ];
+    const testFilmRatings = [
+      { title: "Barbie", rating: 3 },
+      { title: "Barbie", rating: 1 },
+      { title: "Barbie", rating: 5 },
+      { title: "Babe", rating: 1 },
+      { title: "Bambi", rating: 2 },
+      { title: "Bambi", rating: 4 },
+      { title: "Ben-Hur", rating: 5 },
+      { title: "Ben-Hur", rating: 3 },
+      { title: "Ben-Hur", rating: 4 },
+      { title: "Braveheart", rating: 4 },
+      { title: "Braveheart", rating: 3 },
+      { title: "Barbie", rating: 4 },
+    ];
+
+    // Act
+    const outputUsers = formatUserData(testUsers, testFilmRatings);
+    // Assert
+
+    expect(testUsers).toEqual([
+      { username: "bartyBoo", favFilms: ["Barbie", "Braveheart", "Ben-Hur"] },
+      { username: "rosieandjim", favFilms: ["Braveheart", "Bambi", "Babe"] },
+    ]);
+  });
+});
+
+describe("createFilmLookup", () => {
+  test("returns empty object when passed an empty filmRatings array ", () => {
+    // Arrange
+    const testFilmRatings = [];
+    // Act
+    const outputLookupObj = createFilmLookup(testFilmRatings);
+    // Assert
+    expect(outputLookupObj).toEqual({});
+  });
+  test("returns object with one key of film and a value of average score when passed filmRatings with one film", () => {
+    // Arrange
+    const testFilmRatings = [{ title: "Barbie", rating: 3 }];
+    // Act
+    const outputLookupObj = createFilmLookup(testFilmRatings);
+    // Assert
+    expect(outputLookupObj).toEqual({ Barbie: 3 });
+  });
+  test("returns average score when passed a film that has multiple corresponding rating in the film ratings array", () => {
+    // Arrange
+    const testFilmRatings = [
+      { title: "Barbie", rating: 3 },
+      { title: "Barbie", rating: 1 },
+      { title: "Barbie", rating: 5 },
+      { title: "Barbie", rating: 4 },
+    ];
+    // Act
+    const outputLookupObj = createFilmLookup(testFilmRatings);
+    // Assert
+    expect(outputLookupObj).toEqual({ Barbie: 3.25 });
+  });
+  test("handles multiple films ", () => {
+    // Arrange
+    const testFilmRatings = [
+      { title: "Barbie", rating: 3 },
+      { title: "Barbie", rating: 1 },
+      { title: "Barbie", rating: 5 },
+      { title: "Babe", rating: 1 },
+      { title: "Bambi", rating: 2 },
+      { title: "Bambi", rating: 4 },
+      { title: "Ben-Hur", rating: 5 },
+      { title: "Ben-Hur", rating: 3 },
+      { title: "Ben-Hur", rating: 4 },
+      { title: "Braveheart", rating: 4 },
+      { title: "Braveheart", rating: 3 },
+      { title: "Barbie", rating: 4 },
+    ];
+    // Act
+    const outputLookupObj = createFilmLookup(testFilmRatings);
+    // Assert
+    expect(outputLookupObj).toEqual({
+      Barbie: 3.25,
+      Braveheart: 3.5,
+      "Ben-Hur": 4,
+      Bambi: 3,
+      Babe: 1,
+    });
   });
 });
