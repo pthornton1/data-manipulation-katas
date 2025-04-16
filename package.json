@@ -1,0 +1,23 @@
+{
+  "name": "data-manipulation",
+  "version": "1.0.0",
+  "description": "This is a repo for the data manipulation katas for Northcoders:",
+  "main": "createRef.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pthornton1/data-manipulation-katas.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pthornton1/data-manipulation-katas/issues"
+  },
+  "homepage": "https://github.com/pthornton1/data-manipulation-katas#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
