@@ -1,4 +1,5 @@
 const { createRef } = require("../createRef");
+const { formatAlbums } = require("../formatAlbums");
 
 describe("createRef", () => {
   test("returns an empty object when passed an empty array", () => {
@@ -77,5 +78,77 @@ describe("createRef", () => {
       Jim: "lk1ff8s",
       David: undefined,
     });
+  });
+});
+
+describe("formatAlbums", () => {
+  test("returns an empty array when passed an empty array of albums", () => {
+    // Arrange
+    const testAlbums = [];
+    const testArtistIdReference = {};
+    // Act
+    const outputAlbums = formatAlbums(testAlbums, testArtistIdReference);
+    // Assert
+    expect(outputAlbums).toEqual([]);
+  });
+  test("returns a new array of albums as output", () => {
+    // Arrange
+    const testAlbums = [];
+    const testArtistIdReference = {};
+    // Act
+    const outputAlbums = formatAlbums(testAlbums, testArtistIdReference);
+    // Assert
+    expect(outputAlbums).not.toBe(testAlbums);
+  });
+  test("returns object with artist swapped for id when passed one album in array", () => {
+    // Arrange
+    const testAlbums = [
+      { name: "Lover", artist: "Taylor Swift", releaseYear: 2019 },
+    ];
+    const testArtistIdReference = {
+      "Taylor Swift": 9923,
+    };
+    // Act
+    const outputAlbums = formatAlbums(testAlbums, testArtistIdReference);
+    // Assert
+    expect(outputAlbums).toEqual([
+      { name: "Lover", artistId: 9923, releaseYear: 2019 },
+    ]);
+  });
+  test("returns object with artist swapped for id when passed multiple albums in array", () => {
+    // Arrange
+    const testAlbums = [
+      { name: "Lover", artist: "Taylor Swift", releaseYear: 2019 },
+      { name: "High Voltage", artist: "AC/DC", releaseYear: 1975 },
+    ];
+    const testArtistIdReference = {
+      "Taylor Swift": 9923,
+      "AC/DC": 324,
+    };
+    // Act
+    const outputAlbums = formatAlbums(testAlbums, testArtistIdReference);
+    // Assert
+    expect(outputAlbums).toEqual([
+      { name: "Lover", artistId: 9923, releaseYear: 2019 },
+      { name: "High Voltage", artistId: 324, releaseYear: 1975 },
+    ]);
+  });
+  test("does not mutate input albums array", () => {
+    // Arrange
+    const testAlbums = [
+      { name: "Lover", artist: "Taylor Swift", releaseYear: 2019 },
+      { name: "High Voltage", artist: "AC/DC", releaseYear: 1975 },
+    ];
+    const testArtistIdReference = {
+      "Taylor Swift": 9923,
+      "AC/DC": 324,
+    };
+    // Act
+    const outputAlbums = formatAlbums(testAlbums, testArtistIdReference);
+    // Assert
+    expect(testAlbums).toEqual([
+      { name: "Lover", artist: "Taylor Swift", releaseYear: 2019 },
+      { name: "High Voltage", artist: "AC/DC", releaseYear: 1975 },
+    ]);
   });
 });
